@@ -88,7 +88,7 @@ func TestMySQLDumpCreateTable(t *testing.T) {
 	)
 	buffer := bytes.NewBuffer(make([]byte, 0))
 	assert.Nil(t, dumper.DumpCreateTable(buffer, "table"))
-	assert.Contains(t, buffer.String(), "DROP TABLE IF EXISTS `table`")
+	ddl = strings.Replace(ddl, "CREATE TABLE", "CREATE TABLE IF NOT EXISTS", 1)
 	assert.Contains(t, buffer.String(), ddl)
 }
 

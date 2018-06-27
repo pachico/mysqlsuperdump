@@ -74,12 +74,13 @@ func (d *mySQL) GetTables() (tables []string, err error) {
 func (d *mySQL) DumpCreateTable(w io.Writer, table string) error {
 	d.Log.Println("Dumping structure for table", table)
 	fmt.Fprintf(w, "\n--\n-- Structure for table `%s`\n--\n\n", table)
-	fmt.Fprintf(w, "DROP TABLE IF EXISTS `%s`;\n", table)
 	row := d.DB.QueryRow(fmt.Sprintf("SHOW CREATE TABLE `%s`", table))
 	var tname, ddl string
 	if err := row.Scan(&tname, &ddl); err != nil {
 		return err
 	}
+	ddl = strings.Replace(ddl, "CREATE TABLE", "CREATE TABLE IF NOT EXISTS", 1)
+
 	fmt.Fprintf(w, "%s;\n", ddl)
 	return nil
 }
@@ -218,7 +219,7 @@ func (d *mySQL) Dump(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	
+
 	for _, table := range tables {
 		if d.FilterMap[strings.ToLower(table)] != "ignore" {
 			skipData := d.FilterMap[strings.ToLower(table)] == "nodata"
